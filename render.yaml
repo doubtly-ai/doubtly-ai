@@ -1,0 +1,21 @@
+# One-click setup for Render (free). See README, "Put it online for free".
+services:
+  - type: web
+    name: doubtly-ai
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt -r requirements-postgres.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.3
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PUBLIC_URL
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: SMTP_FROM
+        sync: false
