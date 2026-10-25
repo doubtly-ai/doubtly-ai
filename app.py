@@ -1812,25 +1812,35 @@ async def chat(data: ChatIn, request: Request):
     lang = "Same as the student's message (reply in the language they write in)" if lang in ("", "Same as my question") else lang
     system = CHAT_PROMPT + f"\n\nReply language: {lang}\nStudent's level or curriculum: {data.level.strip()[:80] or 'not specified'}"
     if data.context.strip():
-        system += "\n\nWhat the student is studying right now (from their study tools):\n" + data.context.strip()[:4000]
+        system += "\n\nWhat the student is studying right now (from their study tools):\n" + data.context.strip()[:4000]     
     payload = {
         "system_instruction": {"parts": [{"text": system}]},
         "contents": msgs,
         "generationConfig": {"temperature": 0.4},
-     try:
+    }
+
+    try:
         async with httpx.AsyncClient(timeout=120) as client:
-            r = await client.post(f"{GEMINI_BASE}/models/{GEMINI_MODEL}:generateContent", params={"key": GEMINI_API_KEY}, json=payload)
+            r = await client.post(
+                f"{GEMINI_BASE}/models/{GEMINI_MODEL}:generateContent",
+                params={"key": GEMINI_API_KEY},
+                json=payload
+            )
         r.raise_for_status()
         reply = r.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
         if not reply:
             raise KeyError("empty")
         add_points(user, LB_CHAT_POINTS)
         return {"reply": reply[:6000]}
+
     except httpx.HTTPStatusError as e:
         print("Gemini API error:", e.response.status_code, e.response.text[:2000])
         raise HTTPException(502, f"AI service error ({e.response.status_code}). Try again.")
+    except (KeyError, IndexError, json.JSONDecodeError):
+        raise HTTPException(502, "Doubtly could not answer that. Try asking it a different way.")
     except httpx.HTTPError:
         raise HTTPException(504, "AI service timed out. Please retry.")
+
 # ---------------------------------------------------------------------------
 # World leaderboard: the people who study the most this month. Points come from
 # real answers only. On the 1st, the top 4 of last month get bonus free tries.
