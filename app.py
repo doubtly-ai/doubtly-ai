@@ -1829,10 +1829,6 @@ async def chat(data: ChatIn, request: Request):
         add_points(user, LB_CHAT_POINTS)
         return {"reply": reply[:6000]}
     except httpx.HTTPStatusError as e:
-      print("Gemini API error:", e.response.status_code, e.response.text[:2000])
-        raise HTTPException(502, f"AI service error ({e.response.status_code}). Try again.")
-    except (KeyError, IndexError, json.JSONDecodeError):
-        raise HTTPException(502, "Doubtly could not answer that. Try asking it a different way.")
     except httpx.HTTPError:
         raise HTTPException(504, "AI service timed out. Please retry.")
 
