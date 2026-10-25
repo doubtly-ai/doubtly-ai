@@ -17,7 +17,6 @@ from collections import defaultdict, deque
 from email.message import EmailMessage
 from html.parser import HTMLParser
 from urllib.parse import urljoin, urlparse
-
 import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
@@ -1818,8 +1817,7 @@ async def chat(data: ChatIn, request: Request):
         "system_instruction": {"parts": [{"text": system}]},
         "contents": msgs,
         "generationConfig": {"temperature": 0.4},
-    }
-    try:
+     try:
         async with httpx.AsyncClient(timeout=120) as client:
             r = await client.post(f"{GEMINI_BASE}/models/{GEMINI_MODEL}:generateContent", params={"key": GEMINI_API_KEY}, json=payload)
         r.raise_for_status()
@@ -1829,10 +1827,10 @@ async def chat(data: ChatIn, request: Request):
         add_points(user, LB_CHAT_POINTS)
         return {"reply": reply[:6000]}
     except httpx.HTTPStatusError as e:
+        print("Gemini API error:", e.response.status_code, e.response.text[:2000])
+        raise HTTPException(502, f"AI service error ({e.response.status_code}). Try again.")
     except httpx.HTTPError:
         raise HTTPException(504, "AI service timed out. Please retry.")
-
-
 # ---------------------------------------------------------------------------
 # World leaderboard: the people who study the most this month. Points come from
 # real answers only. On the 1st, the top 4 of last month get bonus free tries.
