@@ -1127,7 +1127,7 @@ async def solve(
     )})
 
     api = f"{GEMINI_BASE}/models/{GEMINI_MODEL}:generateContent"
-    uploaded: list[str] = [
+    uploaded: list[str] = []
     reserved = reserve_use(user, _client_ip(request))
     succeeded = False
     try:
