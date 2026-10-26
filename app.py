@@ -1127,15 +1127,25 @@ async def solve(
     )})
 
     api = f"{GEMINI_BASE}/models/{GEMINI_MODEL}:generateContent"
-    uploaded: list[str] = []
+    uploaded: list[str] = [
     reserved = reserve_use(user, _client_ip(request))
     succeeded = False
-    r.raise_for_status()
-    text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
-    result = json.loads(text)
-         succeeded = True
-    add_points(user, LB_SOLVE_POINTS)
-    return result
+    try:
+        async with httpx.AsyncClient(timeout=600) as client:
+            r = await client.post(
+                api,
+                json={
+                    "contents": [{"role": "user", "parts": parts}],
+                    "generationConfig": {"responseMimeType": "application/json"},
+                },
+                headers={"Content-Type": "application/json"},
+            )
+        r.raise_for_status()
+        text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+        result = json.loads(text)
+        succeeded = True
+        add_points(user, LB_SOLVE_POINTS)
+        return result
     except httpx.HTTPStatusError as e:
         if has_audio and e.response.status_code == 400:
             raise HTTPException(502, "The AI could not read that file. Try an MP3, WAV or MP4 file instead.")
@@ -1146,8 +1156,7 @@ async def solve(
         raise HTTPException(504, "AI service timed out. Please retry.")
     finally:
         if not succeeded:
-            refund_use(reserved)  # a failed try is never counted
-
+            refund_use(reserved)
 
 class ChatMsg(BaseModel):
     role: str
