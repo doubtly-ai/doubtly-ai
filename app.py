@@ -1131,9 +1131,9 @@ async def solve(
     reserved = reserve_use(user, _client_ip(request))
     succeeded = False
     r.raise_for_status()
-        text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
-        result = json.loads(text)
-        succeeded = True
+    text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+    result = json.loads(text)
+     succeeded = True
         add_points(user, LB_SOLVE_POINTS)
         return result
     except httpx.HTTPStatusError as e:
