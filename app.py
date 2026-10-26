@@ -194,6 +194,20 @@ How you help:
 - When asked for a specific number of questions, provide exactly that number and check that none are duplicated.
 - If the student asks for a quiz but does not specify a number, follow the existing default of 10 questions.
 - Adapt explanations and questions to the student's stated level, curriculum, and learning context when available.
+- Explain why an answer is correct, not just what the answer is. Show the reasoning in a logical order.
+- For difficult topics, start with the basics and gradually build toward the harder parts.
+- Define unfamiliar scientific, mathematical, or technical terms in simple language.
+- After solving a maths problem, verify the result by substituting it back into the original problem whenever possible.
+- For science questions, distinguish established facts from theories, estimates, and uncertain explanations.
+- If a question has multiple valid interpretations, explain the likely meaning or ask a short clarifying question.
+- Never invent textbook information, facts, formulas, citations, or references. Clearly acknowledge uncertainty.
+- Avoid repeating the same explanation in different words unless the student needs further clarification.
+- When a student says they do not understand, explain the concept differently using simpler language, a new example, or an analogy.
+- When correcting a misconception, explain why the mistaken idea seems reasonable and what makes the correct explanation different.
+- When relevant, connect the current question to related concepts the student has already studied.
+- For lengthy or complex questions, organize the answer into small sections so the student can follow it easily.
+- Before generating a quiz, ensure each question is clear, the options are plausible, and the answer key is correct.
+- Never claim an answer is guaranteed to be correct. Prioritize accuracy and honest uncertainty over sounding confident.
 
 - You are an AI, not a human. Say so if asked."""
 
@@ -1116,26 +1130,6 @@ async def solve(
     uploaded: list[str] = []
     reserved = reserve_use(user, _client_ip(request))
     succeeded = False
-
-    try:
-        async with httpx.AsyncClient(timeout=600) as client:
-            try:
-                for data, mime in big_files:
-                    uri, name = await gemini_upload(client, data, mime)
-                    uploaded.append(name)
-                    parts.insert(0, {"file_data": {"mime_type": mime, "file_uri": uri}})
-                payload = {
-                    "system_instruction": {"parts": [{"text": PROMPTS[mode]}]},
-                    "contents": [{"role": "user", "parts": parts}],
-                    "generationConfig": {"temperature": 0.3, "responseMimeType": "application/json"},
-                }
-                r = await client.post(api, params={"key": GEMINI_API_KEY}, json=payload)
-            finally:
-                for name in uploaded:  # don't keep students' files on Google longer than needed
-                    try:
-                        await client.delete(f"{GEMINI_BASE}/{name}", headers={"x-goog-api-key": GEMINI_API_KEY})
-                    except httpx.HTTPError:
-                        pass
         r.raise_for_status()
         text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
         result = json.loads(text)
@@ -1822,8 +1816,8 @@ async def chat(data: ChatIn, request: Request):
 
     lang = data.language.strip()[:40]
     lang = "Same as the student's message (reply in the language they write in)" if lang in ("", "Same as my question") else lang
-    system = CHAT_PROMPT + f"\n\nReply language: {lang}\nStudent's level or curriculum: {data.level.strip()[:80] or 'not specified'}"
-    if data.context.strip():
+   system = CHAT_PROMPT + f"\n\nReply language: {lang}\nStudent's level or curriculum: {data.level.strip()[:80] or 'not specified'}"
+    if data.context.strip(): 
         system += "\n\nWhat the student is studying right now (from their study tools):\n" + data.context.strip()[:4000]     
     payload = {
         "system_instruction": {"parts": [{"text": system}]},
