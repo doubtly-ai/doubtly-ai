@@ -1825,7 +1825,7 @@ async def chat(data: ChatIn, request: Request):
 
     lang = data.language.strip()[:40]
     lang = "Same as the student's message (reply in the language they write in)" if lang in ("", "Same as my question") else lang
-   system = CHAT_PROMPT + f"\n\nReply language: {lang}\nStudent's level or curriculum: {data.level.strip()[:80] or 'not specified'}"
+    system = CHAT_PROMPT + f"\n\nReply language: {lang}\nStudent's level or curriculum: {data.level.strip()[:80] or 'not specified'}"
     if data.context.strip(): 
         system += "\n\nWhat the student is studying right now (from their study tools):\n" + data.context.strip()[:4000]     
     payload = {
