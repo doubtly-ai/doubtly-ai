@@ -1134,8 +1134,8 @@ async def solve(
     text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
     result = json.loads(text)
      succeeded = True
-        add_points(user, LB_SOLVE_POINTS)
-        return result
+     add_points(user, LB_SOLVE_POINTS)
+     return result
     except httpx.HTTPStatusError as e:
         if has_audio and e.response.status_code == 400:
             raise HTTPException(502, "The AI could not read that file. Try an MP3, WAV or MP4 file instead.")
