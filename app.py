@@ -1147,6 +1147,7 @@ async def solve(
         add_points(user, LB_SOLVE_POINTS)
         return result
     except httpx.HTTPStatusError as e:
+        print("Gemini API error:", e.response.status_code, e.response.text[:2000])
         if has_audio and e.response.status_code == 400:
             raise HTTPException(502, "The AI could not read that file. Try an MP3, WAV or MP4 file instead.")
         raise HTTPException(502, f"AI service error ({e.response.status_code}). Try again.")
