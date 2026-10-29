@@ -1138,7 +1138,10 @@ async def solve(
                     "contents": [{"role": "user", "parts": parts}],
                     "generationConfig": {"responseMimeType": "application/json"},
                 },
-                headers={"Content-Type": "application/json"},
+               headers={
+    "Content-Type": "application/json",
+    "x-goog-api-key": GEMINI_API_KEY,
+},
             )
         r.raise_for_status()
         text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
