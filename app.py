@@ -1119,6 +1119,7 @@ async def solve(
     label = "Student's doubt" if mode == "doubt" else "Topics and syllabus to cover" if mode == "plan" else "Chapter or topic"
     source = ("\n\n".join(notes) + "\n\n") if notes else ""
     parts.append({"text": (
+        f"{PROMPTS[mode]}\n\n"
         f"Subject: {subject[:40]}\n"
         f"Level or curriculum: {lvl}\n"
         f"{plan_line}"
