@@ -1146,6 +1146,7 @@ async def solve(
         r.raise_for_status()
         text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
         result = json.loads(text)
+        print("STUDY PACK RESULT:", json.dumps(result, ensure_ascii=False)[:3000])
         succeeded = True
         add_points(user, LB_SOLVE_POINTS)
         return result
